@@ -1,0 +1,1 @@
+This is a chess game made with python and pygame. It's still in process. A lot of things must be fixed and added.
