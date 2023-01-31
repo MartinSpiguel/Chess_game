@@ -81,6 +81,8 @@ def main():
     board = chess_engine.Board()
     counter = 0
     game = []
+    legal_moves = board.get_valid_moves()
+    move_made = False
     legal_moves_marker = False
     while run:
         clock.tick(FPS) #Handle fps
@@ -95,19 +97,18 @@ def main():
                 col = loc[0]//SQ_SIZE
                 if counter % 2 == 0:
                     start_square = (row, col)
-                    legal_moves = board.get_legal_moves(row, col)
                     legal_moves_marker = True
                     print(legal_moves, legal_moves_marker)
                 else:
                     end_square = (row, col)
                     move = chess_engine.Move(start_square, end_square, board.board)
                     legal_moves_marker = False
-                    if end_square in legal_moves:
+                    if move in legal_moves:
                         board.make_move(move)
+                        move_made = True
                         game.append(move.get_chess_notation(move.end_row, move.end_col))
-                        print(board.white_to_move, legal_moves, game)
-                    else:
-                        print('Ilegal move')
+                        print(board.white_to_move, game)
+                        
                     #board.make_move(move)
                     #game.append(move.get_chess_notation(move.end_row, move.end_col))
                     #print(board.white_to_move, game)
@@ -115,18 +116,24 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_u:
                     board.undo_move(board.moves[-1])
+                    move_made = True
                     game.pop()
                     print(board.white_to_move, game)
+
+        if move_made:
+            legal_moves = board.get_valid_moves()
+            move_made = False
 
         draw_board(screen)
         draw_pieces(board.board)
         if legal_moves_marker:
-            for sq in legal_moves:
-                coor = (sq[0]*SQ_SIZE, sq[1]*SQ_SIZE)
-                surf = pygame.Surface((SQ_SIZE, SQ_SIZE))
-                surf.set_alpha(80)
-                pygame.draw.rect(surf, GREEN, pygame.Rect((0, 0), (SQ_SIZE, SQ_SIZE)))
-                screen.blit(surf, (coor[1], coor[0]))
+            for move in legal_moves:
+                if (move.start_row, move.start_col) == (row, col):
+                    coor = (move.end_row*SQ_SIZE, move.end_col*SQ_SIZE)
+                    surf = pygame.Surface((SQ_SIZE, SQ_SIZE))
+                    surf.set_alpha(80)
+                    pygame.draw.rect(surf, GREEN, pygame.Rect((0, 0), (SQ_SIZE, SQ_SIZE)))
+                    screen.blit(surf, (coor[1], coor[0]))
                 
         pygame.display.update()
 
